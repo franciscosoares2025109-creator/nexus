@@ -1,0 +1,31 @@
+{% extends 'social/base.html' %}
+
+{% block title %}Registar — Nexus{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+    <div class="auth-card">
+        <h1 class="auth-title">Criar conta</h1>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <ul class="field-errors">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn--primary btn--full">Criar conta</button>
+        </form>
+
+        <p class="auth-switch">Já tem conta? <a href="{% url 'login' %}">Entre aqui</a></p>
+    </div>
+</div>
+{% endblock %}

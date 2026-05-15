@@ -1,0 +1,111 @@
+{% extends 'social/base.html' %}
+
+{% block title %}{{ profile_user.username }} — Nexus{% endblock %}
+
+{% block content %}
+<div class="profile-layout">
+
+    <div class="profile-header-card">
+        <div class="profile-avatar-wrap">
+            {% if profile.avatar %}
+                <img src="{{ profile.avatar.url }}" alt="{{ profile_user.username }}" class="avatar avatar--lg avatar--img">
+            {% else %}
+                <div class="avatar avatar--lg">{{ profile_user.username|first|upper }}</div>
+            {% endif %}
+        </div>
+
+        <div class="profile-info">
+            <h1 class="profile-username">{{ profile_user.username }}</h1>
+            {% if profile_user.first_name or profile_user.last_name %}
+                <p class="profile-fullname">{{ profile_user.first_name }} {{ profile_user.last_name }}</p>
+            {% endif %}
+            {% if profile.bio %}
+                <p class="profile-bio">{{ profile.bio }}</p>
+            {% endif %}
+            <p class="profile-joined">Membro desde {{ profile_user.date_joined|date:"M Y" }}</p>
+        </div>
+
+        <div class="profile-stats">
+            <div class="stat-item">
+                <span class="stat-num">{{ profile.get_post_count }}</span>
+                <span class="stat-label">publicações</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num">{{ profile.get_like_count }}</span>
+                <span class="stat-label">gostos recebidos</span>
+            </div>
+        </div>
+    </div>
+
+    {% if user == profile_user and edit_form %}
+    <details class="edit-profile-section">
+        <summary class="edit-profile-toggle">Editar perfil</summary>
+        <div class="edit-profile-form">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Biografia</label>
+                    {{ edit_form.bio }}
+                </div>
+                <div class="form-group">
+                    <label>Avatar</label>
+                    {{ edit_form.avatar }}
+                </div>
+                <button type="submit" class="btn btn--primary">Guardar</button>
+            </form>
+        </div>
+    </details>
+    {% endif %}
+
+    <section class="profile-posts">
+        <h2 class="section-title">Publicações de {{ profile_user.username }}</h2>
+
+        <div class="posts-list">
+            {% for post in posts %}
+            <article class="post-card">
+                <div class="post-header">
+                    <div class="post-author">
+                        <div class="avatar avatar--sm">{{ profile_user.username|first|upper }}</div>
+                        <div class="post-author-info">
+                            <span class="author-name">{{ profile_user.username }}</span>
+                            <span class="post-date">{{ post.created_at|date:"d M Y, H:i" }}</span>
+                        </div>
+                    </div>
+                    {% if user == post.author %}
+                    <form method="post" action="{% url 'delete_post' post.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-icon btn-icon--danger">✕</button>
+                    </form>
+                    {% endif %}
+                </div>
+
+                <div class="post-content">
+                    <p>{{ post.content }}</p>
+                </div>
+
+                <div class="post-actions">
+                    {% if user.is_authenticated %}
+                    <button class="like-btn {% if post.liked_by_user %}liked{% endif %}"
+                            data-post-id="{{ post.id }}"
+                            data-url="{% url 'toggle_like' post.id %}">
+                        <span class="like-icon">♥</span>
+                        <span class="like-count">{{ post.get_like_count }}</span>
+                    </button>
+                    {% else %}
+                    <span class="like-display">♥ {{ post.get_like_count }}</span>
+                    {% endif %}
+                    <a href="{% url 'post_detail' post.id %}" class="comment-btn">
+                        💬 {{ post.get_comment_count }}
+                    </a>
+                </div>
+            </article>
+            {% empty %}
+            <div class="empty-state">
+                <p>Nenhuma publicação ainda.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+{% endblock %}

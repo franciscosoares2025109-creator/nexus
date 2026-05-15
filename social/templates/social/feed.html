@@ -1,0 +1,89 @@
+{% extends 'social/base.html' %}
+
+{% block title %}Feed — Nexus{% endblock %}
+
+{% block content %}
+<div class="feed-layout">
+
+    <div class="feed-sidebar">
+        <div class="sidebar-card">
+            <h3 class="sidebar-title">Nexus</h3>
+            <p class="sidebar-desc">A sua rede social minimalista. Partilhe ideias, reaja, conecte-se.</p>
+        </div>
+        {% if user.is_authenticated %}
+        <div class="sidebar-card sidebar-card--stats">
+            <div class="stat-item">
+                <span class="stat-num">{{ user.posts.count }}</span>
+                <span class="stat-label">publicações</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num">{{ user.likes.count }}</span>
+                <span class="stat-label">gostos dados</span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="feed-main">
+        {% if user.is_authenticated %}
+        <div class="compose-card">
+            <div class="compose-header">
+                <div class="avatar avatar--sm">{{ user.username|first|upper }}</div>
+                <span class="compose-username">{{ user.username }}</span>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.content }}
+                <div class="compose-footer">
+                    <span class="char-counter"><span id="charCount">0</span>/500</span>
+                    <button type="submit" class="btn btn--primary">Publicar</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="posts-list">
+            {% for post in posts %}
+            <article class="post-card">
+                <div class="post-header">
+                    <a href="{% url 'user_profile' post.author.username %}" class="post-author">
+                        <div class="avatar avatar--sm">{{ post.author.username|first|upper }}</div>
+                        <div class="post-author-info">
+                            <span class="author-name">{{ post.author.username }}</span>
+                            <span class="post-date">{{ post.created_at|date:"d M Y, H:i" }}</span>
+                        </div>
+                    </a>
+                    {% if user == post.author %}
+                    <form method="post" action="{% url 'delete_post' post.id %}" class="delete-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-icon btn-icon--danger" title="Apagar">✕</button>
+                    </form>
+                    {% endif %}
+                </div>
+
+                <div class="post-content">
+                    <p>{{ post.content }}</p>
+                </div>
+
+                <div class="post-actions">
+                    {% if user.is_authenticated %}
+                    <button class="like-btn {% if post.liked_by_user %}liked{% endif %}"
+                            data-post-id="{{ post.id }}"
+                            data-url="{% url 'toggle_like' post.id %}">
+                        <span class="like-icon">♥</span>
+                        <span class="like-count">{{ post.get_like_count }}</span>
+                    </button>
+                    {% else %}
+                    <span class="like-display">♥ {{ post.get_like_count }}</span>
+                    {% endif %}
+
+                    <a href="{% url 'post_detail' post.id %}" class="comment-btn">
+                        <span>💬</span>
+                        <span>{{ post.get_comment_count }}</span>
+                    </a>
+                </div>
+            </article>
+            {% empty %}
+            <div class="empty-state">
+                <p class="empty-title">Nenhuma publicação ainda.</p>
+                {% if user.is_a

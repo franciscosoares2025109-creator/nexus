@@ -1,0 +1,86 @@
+{% extends 'social/base.html' %}
+
+{% block title %}Publicação de {{ post.author.username }} — Nexus{% endblock %}
+
+{% block content %}
+<div class="detail-layout">
+    <div class="detail-back">
+        <a href="{% url 'feed' %}" class="back-link">← Voltar ao feed</a>
+    </div>
+
+    <article class="post-card post-card--featured">
+        <div class="post-header">
+            <a href="{% url 'user_profile' post.author.username %}" class="post-author">
+                <div class="avatar">{{ post.author.username|first|upper }}</div>
+                <div class="post-author-info">
+                    <span class="author-name">{{ post.author.username }}</span>
+                    <span class="post-date">{{ post.created_at|date:"d \d\e M \d\e Y, \à\s H:i" }}</span>
+                </div>
+            </a>
+            {% if user == post.author %}
+            <form method="post" action="{% url 'delete_post' post.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-icon btn-icon--danger">✕ Apagar</button>
+            </form>
+            {% endif %}
+        </div>
+
+        <div class="post-content post-content--large">
+            <p>{{ post.content }}</p>
+        </div>
+
+        <div class="post-actions">
+            {% if user.is_authenticated %}
+            <button class="like-btn {% if post.liked_by_user %}liked{% endif %}"
+                    data-post-id="{{ post.id }}"
+                    data-url="{% url 'toggle_like' post.id %}">
+                <span class="like-icon">♥</span>
+                <span class="like-count">{{ post.get_like_count }}</span>
+            </button>
+            {% else %}
+            <span class="like-display">♥ {{ post.get_like_count }}</span>
+            {% endif %}
+            <span class="comment-count-label">💬 {{ post.get_comment_count }} comentário{{ post.get_comment_count|pluralize:"s" }}</span>
+        </div>
+    </article>
+
+    <section class="comments-section">
+        <h2 class="section-title">Comentários</h2>
+
+        {% if user.is_authenticated %}
+        <div class="compose-card compose-card--comment">
+            <form method="post">
+                {% csrf_token %}
+                {{ comment_form.content }}
+                <div class="compose-footer">
+                    <button type="submit" class="btn btn--primary btn--sm">Comentar</button>
+                </div>
+            </form>
+        </div>
+        {% else %}
+        <div class="auth-nudge">
+            <a href="{% url 'login' %}">Entre</a> para comentar.
+        </div>
+        {% endif %}
+
+        <div class="comments-list">
+            {% for comment in comments %}
+            <div class="comment-card">
+                <div class="comment-header">
+                    <a href="{% url 'user_profile' comment.author.username %}" class="comment-author">
+                        <div class="avatar avatar--xs">{{ comment.author.username|first|upper }}</div>
+                        <span class="author-name">{{ comment.author.username }}</span>
+                    </a>
+                    <span class="post-date">{{ comment.created_at|date:"d M, H:i" }}</span>
+                </div>
+                <p class="comment-content">{{ comment.content }}</p>
+            </div>
+            {% empty %}
+            <div class="empty-state empty-state--sm">
+                <p>Ainda sem comentários. Seja o primeiro!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

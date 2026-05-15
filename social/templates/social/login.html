@@ -1,0 +1,32 @@
+{% extends 'social/base.html' %}
+
+{% block title %}Entrar — Nexus{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+    <div class="auth-card">
+        <h1 class="auth-title">Entrar no Nexus</h1>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="message message--error">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Utilizador</label>
+                <input type="text" name="username" id="username" class="auth-input" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="password">Palavra-passe</label>
+                <input type="password" name="password" id="password" class="auth-input" required>
+            </div>
+            <button type="submit" class="btn btn--primary btn--full">Entrar</button>
+        </form>
+
+        <p class="auth-switch">Não tem conta? <a href="{% url 'register' %}">Registe-se</a></p>
+    </div>
+</div>
+{% endblock %}

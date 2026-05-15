@@ -1,0 +1,5 @@
+Django==4.2.13
+PyMySQL==1.1.1
+python-dotenv==1.0.1
+Pillow==10.3.0
+gunicorn==22.0.0
